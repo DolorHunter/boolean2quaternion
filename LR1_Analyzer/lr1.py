@@ -85,20 +85,18 @@ def create_grammar_list(filename):
 def extract_terminal_symbol():
     # 遍历文法表g[], 提取终结符与非终结符
     for gram in grams:
-        if gram == '':  # 空行跳过
-            continue
-        else:
+        if gram != '':  # 非空行
             elems = gram.split('->')
             if gram[0] not in vn:
                 vn.append(gram[0])  # 加入左端非终结符
             for elem in elems[1]:
                 # 新元素入表
-                if not(elem in vt or elem in vn):
+                if elem not in vt+vn:
                     if elem.isupper():
                         vn.append(elem)  # 非终结符加入vn{}
-                    elif elem != 'ε' and elem != '|':
+                    elif elem not in ('ε', '|'):
                         vt.append(elem)  # 终结符加入vt{}
-    # print('vn', vn, 'vt:', vt)  # test
+    # print('vn', vn, 'vt', vt)  # test
     print('Terminal & non-terminal symbols were extracted!!')
 
 
@@ -147,20 +145,20 @@ def create_first_assemble():
             while next_elem in vn:  # 非终结符继续搜索
                 for s_gram in simp_grams:  # 寻找生成式子左端(从下至上)  # reversed后续如何退出???
                     if s_gram[0] == next_elem:  # 找到符合的生成式
-                        next = s_gram.split('->')
-                        if next[1][0] in vt:  # 终结符
-                            first_langs[first[0][0]].add(next[1][0])  # 将此非终结符加入原起始符的first集合
+                        next_e = s_gram.split('->')
+                        if next_e[1][0] in vt:  # 终结符
+                            first_langs[first[0][0]].add(next_e[1][0])  # 将此非终结符加入原起始符的first集合
                             # 继续寻找下一个潜在终结符, 直到找到表头
                             if s_gram == simp_grams[len(simp_grams)-1]:  # 当走到表尾
-                                next_elem = next[1][0]  # 下一个元素(while退出)
-                        elif 'ε' in first_langs[next[1][0]]:  # 推导出的元素是epsilon
-                            first_langs[first[0][0]].add(next[1][0])  # ep加入first集合中
+                                next_elem = next_e[1][0]  # 下一个元素(while退出)
+                        elif 'ε' in first_langs[next_e[1][0]]:  # 推导出的元素是epsilon
+                            first_langs[first[0][0]].add(next_e[1][0])  # ep加入first集合中
                             if len(first[1]) > 1:  # 当生成式右端为多个字符, 搜索邻位字符的first集
                                 next_elem = first[1][1]
                         else:  # 非终结符
-                            for elem in first_langs[next[1][0]]:  # 复制非终结符的first集给自己
+                            for elem in first_langs[next_e[1][0]]:  # 复制非终结符的first集给自己
                                 first_langs[first[0][0]].add(elem)
-                            next_elem = next[1][0]  # 继续寻找
+                            next_elem = next_e[1][0]  # 继续寻找
     # print(first_langs)  # test
     print('First assemble was created successfully!!')
 
@@ -234,21 +232,21 @@ def create_can_cols():
     old_can_cols = []
     while not operator.eq(old_can_cols, can_cols):  # 当新旧c_cs不等, 表示仍有未访问的状态
         old_can_cols = copy.deepcopy(can_cols)  # 将c_cs赋给旧c_cs
-        for i in range(len(can_cols)):
+        for can_col in can_cols:
             elem = []  # 用于消除不同项目的同元素产生的重复状态
-            for c_col in can_cols[i][1]:  # 遍历状态中的项目集
+            for c_col in can_col[1]:  # 遍历状态中的项目集
                 if len(c_col[0]) > c_col[2]+1:  # 项目中的点不为最后一个元素(其他情况无下一状态)
                     x = c_col[0][c_col[2]+1]
-                    go_result = go(can_cols[i][1], x)  # go运算结果(减少重复运算)
+                    go_result = go(can_col[1], x)  # go运算结果(减少重复运算)
                     new_result = True  # 新状态标记
-                    for j in range(len(can_cols)):
-                        if operator.eq(go_result, can_cols[j][1]):  # 与已有状态相等, 为旧状态(重复状态)
+                    for can_col2 in can_cols:
+                        if operator.eq(go_result, can_col2[1]):  # 与已有状态相等, 为旧状态(重复状态)
                             new_result = False
                     # go非空且不属于c且为新状态
                     if go_result != [] and go_result not in clos and new_result:
                         if x not in elem:  # 该状态的触发元素第一次出现(合并同状态中, 不同项目的同个触发条件, 以合并下个状态)
                             elem.append(x)  # 加入元素
-                        can_cols.append([ct+elem.index(x)+1, go_result])  # 加入状态In, 新状态设置为True
+                            can_cols.append([ct + elem.index(x) + 1, go_result])  # 加入状态In, 新状态设置为True
             ct += len(elem)  # 前进elem个状态(len(elem)为当前状态新产生的状态数量)
     # print(can_cols)  # test
     print('The canonical collections were created!!')
@@ -287,51 +285,51 @@ def create_analysis_list():
         goto.append(line_info)
 
     # 填写action表, goto表
-    for i in range(len(can_cols)):  # 遍历项目集规范族中的每个状态
-        for k in range(len(can_cols[i][1])):  # 遍历该状态的每个项目
+    for can_col in can_cols:  # 遍历项目集规范族中的每个状态
+        for c_col in can_col[1]:  # 遍历该状态的每个项目
             # 情况一: A->a•ab属于Ik且Go(Ik,a)=Ij, a为终结符
-            if len(can_cols[i][1][k][0]) > can_cols[i][1][k][2]+1:  # 点不为尾元素(潜在移进)
-                x = can_cols[i][1][k][0][can_cols[i][1][k][2]+1]  # 点后的元素
-                go_result = go(can_cols[i][1], x)  # go下一个状态的项目集
+            if len(c_col[0]) > c_col[2]+1:  # 点不为尾元素(潜在移进)
+                x = c_col[0][c_col[2]+1]  # 点后的元素
+                go_result = go(can_col[1], x)  # go下一个状态的项目集
                 for c_c in can_cols:
                     j = c_c[0]  # j为新状态状态序号(c_c[0]), 新状态Ij为c_c[1]
                     if operator.eq(go_result, c_c[1]):  # Go(Ik,a)=Ij
                         if x in vt:  # x为终结符(情况一)
-                            if action[can_cols[i][0] + 1][action_first_line.index(x)] != '' and \
-                                    action[can_cols[i][0] + 1][action_first_line.index(x)][0] != 's' + str(j):
+                            if action[can_col[0] + 1][action_first_line.index(x)] != '' and \
+                                    action[can_col[0] + 1][action_first_line.index(x)][0] != 's' + str(j):
                                 print('[ERROR]: NOT LR(1) GRAMMAR!! Code: 1')
                                 return False  # 存在多重入口, 不是LR(1)文法
-                            action[can_cols[i][0] + 1][action_first_line.index(x)] = 's' + str(j)  # ACTION[k,a]=sj
+                            action[can_col[0] + 1][action_first_line.index(x)] = 's' + str(j)  # ACTION[k,a]=sj
                         # 情况四: Go(Ik,A)=Ij, A为非终结符, Goto[k,A]=j
                         elif x in vn:  # x为非终结符(情况四)
-                            if goto[can_cols[i][0] + 1][goto_first_line.index(x)] != '' and \
-                                    goto[can_cols[i][0] + 1][goto_first_line.index(x)] != j:
+                            if goto[can_col[0] + 1][goto_first_line.index(x)] != '' and \
+                                    goto[can_col[0] + 1][goto_first_line.index(x)] != j:
                                 print('[ERROR]: NOT LR(1) GRAMMAR!! Code 4')
                                 return False  # 存在多重入口, 不是LR(1)文法
-                            goto[can_cols[i][0] + 1][goto_first_line.index(x)] = j  # Goto[k,A]=j
+                            goto[can_col[0] + 1][goto_first_line.index(x)] = j  # Goto[k,A]=j
                         else:
                             print('[WARNING]: x not in vt or vn!!')
             # 情况二: [A→d•, a]属于Ik, 置ACTION[k,a]为rj. (假定A->a为文法G'的第j个产生式)
-            elif len(can_cols[i][1][k][0]) == can_cols[i][1][k][2]+1:  # 点为最后元素(潜在规约)
+            elif len(c_col[0]) == c_col[2]+1:  # 点为最后元素(潜在规约)
                 # 情况三: (拓广文法)若项目S'→S·属于Ik，则置ACTION[k,#]为“acc”
-                if operator.eq(can_cols[i][1][k][0], simp_grams[0]+'•'):  # 项目为拓广文法(状态启动文法)
-                    if can_cols[i][1][k][1] == '#':  # 设置 # 为空
-                        if action[can_cols[i][0]+1][action_first_line.index('#')] != '' and \
-                                action[can_cols[i][0] + 1][action_first_line.index('#')] != 'acc':
+                if operator.eq(c_col[0], simp_grams[0]+'•'):  # 项目为拓广文法(状态启动文法)
+                    if c_col[1] == '#':  # 设置 # 为空
+                        if action[can_col[0]+1][action_first_line.index('#')] != '' and \
+                                action[can_col[0] + 1][action_first_line.index('#')] != 'acc':
                             print('[ERROR]: NOT LR(1) GRAMMAR!! Code 3')
                             return False  # 存在多重入口, 不是LR(1)文法
-                        action[can_cols[i][0]+1][action_first_line.index('#')] = 'acc'  # 完成标志(移进-规约完成)
+                        action[can_col[0]+1][action_first_line.index('#')] = 'acc'  # 完成标志(移进-规约完成)
                 else:  # 情况二: (非拓广文法)[A→d•, a]属于Ik, 置ACTION[k,a]为rj. (假定A->a为文法G'的第j个产生式)
-                    row_gram = str(can_cols[i][1][k][0]).replace('•', '')  # 消去点(得到产生式)
+                    row_gram = str(c_col[0]).replace('•', '')  # 消去点(得到产生式)
                     for j in range(len(simp_grams)):
                         if operator.eq(row_gram, simp_grams[j]):
-                            for x in can_cols[i][1][k][1]:
-                                if (x != '#' and x in vt) or len(can_cols[i][1][k][1]) == 1:  # 为vt或只含#
-                                    if action[can_cols[i][0] + 1][action_first_line.index(x)] != '' and \
-                                            action[can_cols[i][0] + 1][action_first_line.index(x)] != 'r' + str(j):
+                            for x in c_col[1]:
+                                if (x != '#' and x in vt) or len(c_col[1]) == 1:  # 为vt或只含#
+                                    if action[can_col[0] + 1][action_first_line.index(x)] != '' and \
+                                            action[can_col[0] + 1][action_first_line.index(x)] != 'r' + str(j):
                                         print('[ERROR]: NOT LR(1) GRAMMAR!! Code 2')
                                         return False  # 存在多重入口, 不是LR(1)文法
-                                    action[can_cols[i][0]+1][action_first_line.index(x)] = 'r' + str(j)  # ACTION[k,a]=rj
+                                    action[can_col[0]+1][action_first_line.index(x)] = 'r' + str(j)  # ACTION[k,a]=rj
             else:
                 print("[WARNING]: len(c_cs) < c_cs[i][1][k].index('•')+1, WTF??")
     # print(action)  # test

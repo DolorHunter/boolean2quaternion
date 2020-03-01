@@ -180,8 +180,8 @@ class MainWindows:
     # 打开分析表
     @staticmethod
     def open_analysis_list():
-        if not lr1.create_analysis_list():  # 生成分析表(如果不是SLR(1)文法)
-            messagebox.showerror('文法错误!!', '文法不是SLR(1)文法!!')
+        if not lr1.create_analysis_list():  # 生成分析表(如果不是LR(1)文法)
+            messagebox.showerror('文法错误!!', '文法不是LR(1)文法!!')
         else:  # 是lr1文法
             alw = Tk()
             alw.resizable(False, False)
