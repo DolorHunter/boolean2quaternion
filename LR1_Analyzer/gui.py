@@ -32,7 +32,7 @@ class MainWindows:
         self.input_label.grid(row=1, column=0, columnspan=1)
         self.input_entry = Entry(self.input_frame, textvariable=self.init_input, state=NORMAL, width=45)
         self.input_entry.grid(row=1, column=1, columnspan=4)
-        self.init_input.set('aabab#')  # 初始输入串'
+        self.init_input.set('notirelopvorvand(irelopv)#')  # 初始输入串'
         # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # self.info_frame为文法, 扩广文法的容器
         self.info_frame = Frame(master)
@@ -175,7 +175,8 @@ class MainWindows:
         lr1.create_can_cols()  # 构造项目集族
         for cols in lr1.can_cols:
             for c in cols[1]:
-                self.canonical_collections_tree.insert("", END, values=(cols[0], (c[0], c[1])))
+                values = (cols[0], (c[0], c[1]))
+                self.canonical_collections_tree.insert("", END, values=values)
 
     # 打开分析表
     @staticmethod
@@ -238,9 +239,9 @@ class AnalysisListWindows:
         # self.label_frame为标签容器
         self.label_frame = Frame(master)
         self.label_frame.pack()
-        self.status_label = Label(self.label_frame, text='STATUS', width=10).grid(row=0, column=0)
-        self.actions_label = Label(self.label_frame, text='ACTION', width=35).grid(row=0, column=1)
-        self.goto_label = Label(self.label_frame, text='GOTO', width=25).grid(row=0, column=2)
+        self.status_label = Label(self.label_frame, text='STATUS', width=7).grid(row=0, column=0)
+        self.actions_label = Label(self.label_frame, text='ACTION', width=60).grid(row=0, column=1)
+        self.goto_label = Label(self.label_frame, text='GOTO', width=53).grid(row=0, column=2)
         # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # self.analysis_list_frame为分析表的容器
         self.analysis_list_frame = Frame(master)
@@ -248,7 +249,7 @@ class AnalysisListWindows:
         # 实例化分析表
         self.analysis_list_tree = ttk.Treeview(
             self.analysis_list_frame,
-            height=12,
+            height=20,
             show="headings",  # 隐藏首列
         )
         self.analysis_list_tree.grid(row=0, column=0, columnspan=1, sticky="NSEW")
@@ -263,11 +264,11 @@ class AnalysisListWindows:
         for goto in lr1.goto_heading:
             heading.append(goto)
         self.analysis_list_tree["columns"] = heading
-        self.analysis_list_tree.column("Status", width=100, anchor="center")  # 表示列,不显示
+        self.analysis_list_tree.column("Status", width=70, anchor="center")  # 表示列,不显示
         for action in lr1.action_heading:
-            self.analysis_list_tree.column(action, width=75, anchor="center")
+            self.analysis_list_tree.column(action, width=45, anchor="center")
         for goto in lr1.goto_heading:
-            self.analysis_list_tree.column(goto, width=75, anchor="center")
+            self.analysis_list_tree.column(goto, width=45, anchor="center")
         # 表列设置
         self.analysis_list_tree.heading("Status", text="Status")  # 显示表头
         for action in lr1.action_heading:
@@ -297,7 +298,7 @@ class AnalysisProcessWindows:
         # 实例化分析表
         self.analysis_process_tree = ttk.Treeview(
             self.analysis_process_frame,
-            height=15,
+            height=22,
             show="headings",  # 隐藏首列
         )
         self.analysis_process_tree.grid(row=0, column=0, columnspan=1, sticky="NSEW")
@@ -307,11 +308,11 @@ class AnalysisProcessWindows:
         vbar.grid(row=0, column=1, sticky="NS")
         # 表头设置
         self.analysis_process_tree["columns"] = ('steps', 'status_stack', 'symbol_stack', 'input_string', 'actions')
-        self.analysis_process_tree.column("steps", width=65, anchor="center")  # 表示列,不显示
-        self.analysis_process_tree.column("status_stack", width=90)  # 表示列,不显示
-        self.analysis_process_tree.column("symbol_stack", width=75)  # 表示列,不显示
-        self.analysis_process_tree.column("input_string", width=75, anchor="e")  # 表示列,不显示
-        self.analysis_process_tree.column("actions", width=230, anchor="center")  # 表示列,不显示
+        self.analysis_process_tree.column("steps", width=50, anchor="center")  # 表示列,不显示
+        self.analysis_process_tree.column("status_stack", width=130)  # 表示列,不显示
+        self.analysis_process_tree.column("symbol_stack", width=170)  # 表示列,不显示
+        self.analysis_process_tree.column("input_string", width=210, anchor="e")  # 表示列,不显示
+        self.analysis_process_tree.column("actions", width=250, anchor="center")  # 表示列,不显示
         # 表列设置
         self.analysis_process_tree.heading("steps", text="步骤")
         self.analysis_process_tree.heading("status_stack", text="状态栈")

@@ -1,3 +1,8 @@
-S->BB
-B->aB
-B->b
+S->AandMB
+A->notC
+B->(D)
+C->DorMF
+D->ErelopF
+E->i
+F->v
+M->¦Å
