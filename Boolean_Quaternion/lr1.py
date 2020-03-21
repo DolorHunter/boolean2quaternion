@@ -460,7 +460,7 @@ def main():
     #print(create_closure(collections[0]))  # test
     create_can_cols()
     create_analysis_list()
-    analysis_input_string('notirelopvorvand(irelopv)#') #notirelopvorεvandε(irelopv)
+    analysis_input_string('notirelopvoryand(irelopv)#') #notirelopvorεvandε(irelopv)
 
 
 if __name__ == '__main__':

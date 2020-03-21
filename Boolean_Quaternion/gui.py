@@ -5,6 +5,7 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 import lr1
+import boolean_quaternion as bq
 
 
 # 主窗口
@@ -32,7 +33,7 @@ class MainWindows:
         self.input_label.grid(row=1, column=0, columnspan=1)
         self.input_entry = Entry(self.input_frame, textvariable=self.init_input, state=NORMAL, width=45)
         self.input_entry.grid(row=1, column=1, columnspan=4)
-        self.init_input.set('notirelopvorvand(irelopv)#')  # 初始输入串'
+        self.init_input.set('notirelopvoryand(irelopv)#')  # 初始输入串'
         # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # self.info_frame为文法, 扩广文法的容器
         self.info_frame = Frame(master)
@@ -199,6 +200,15 @@ class MainWindows:
         AnalysisProcessWindows(apw)
         apw.mainloop()
 
+    # 打开四元式
+    def open_boolean_quaternion(self):
+        bq.analyzer(self.get_input_string())  # 生成四元式
+        bpw = Tk()
+        bpw.resizable(False, False)
+        bpw.title('布尔四元式')
+        BooleanQuaternionWindows(bpw)
+        bpw.mainloop()
+
     # 打开文件导入语法
     def open_file(self):
         filename = filedialog.askopenfile()
@@ -219,8 +229,8 @@ class MainWindows:
                 messagebox.showerror('输入错误!!', '请输入一个输入串以开始分析!!')
                 print("[ERROR] PLEASE INPUT A STRING FIRST!!")
         else:  # 开始文法分析
-            self.open_analysis_process()  # 打开分析表
-
+            #self.open_analysis_process()  # 打开分析表
+            self.open_boolean_quaternion()  # 打开布尔四元式
         print("Analysis running successfully!!")
 
     # 帮助
@@ -253,10 +263,6 @@ class AnalysisListWindows:
             show="headings",  # 隐藏首列
         )
         self.analysis_list_tree.grid(row=0, column=0, columnspan=1, sticky="NSEW")
-        # 垂直滚动条
-        vbar = ttk.Scrollbar(self.analysis_list_frame, orient="vertical", command=self.analysis_list_tree.yview)
-        self.analysis_list_tree.configure(yscrollcommand=vbar.set)
-        vbar.grid(row=0, column=1, sticky="NS")
         # 表头设置
         heading = ['Status']
         for action in lr1.action_heading:
@@ -275,6 +281,10 @@ class AnalysisListWindows:
             self.analysis_list_tree.heading(action, text=action)
         for goto in lr1.goto_heading:
             self.analysis_list_tree.heading(goto, text=goto)
+        # 垂直滚动条
+        vbar = ttk.Scrollbar(self.analysis_list_frame, orient="vertical", command=self.analysis_list_tree.yview)
+        self.analysis_list_tree.configure(yscrollcommand=vbar.set)
+        vbar.grid(row=0, column=1, sticky="NS")
 
         self.show_analysis_list()  # 展示分析表数据
 
@@ -302,10 +312,6 @@ class AnalysisProcessWindows:
             show="headings",  # 隐藏首列
         )
         self.analysis_process_tree.grid(row=0, column=0, columnspan=1, sticky="NSEW")
-        # 垂直滚动条
-        vbar = ttk.Scrollbar(self.analysis_process_frame, orient="vertical", command=self.analysis_process_tree.yview)
-        self.analysis_process_tree.configure(yscrollcommand=vbar.set)
-        vbar.grid(row=0, column=1, sticky="NS")
         # 表头设置
         self.analysis_process_tree["columns"] = ('steps', 'status_stack', 'symbol_stack', 'input_string', 'actions')
         self.analysis_process_tree.column("steps", width=50, anchor="center")  # 表示列,不显示
@@ -334,11 +340,86 @@ class AnalysisProcessWindows:
             self.analysis_process_tree.insert("", END, values=values)
 
 
+# 四元式窗口
+class BooleanQuaternionWindows:
+    def __init__(self, master):
+        # self.boolean_quaternion_frame为布尔四元式容器
+        self.boolean_quaternion_frame = Frame(master)
+        self.boolean_quaternion_frame.pack()
+        # 实例化分析表
+        self.boolean_quaternion_tree = ttk.Treeview(
+            self.boolean_quaternion_frame,
+            height=6,
+            show="headings",  # 隐藏首列
+        )
+        self.boolean_quaternion_tree.grid(row=0, column=0, columnspan=1, sticky="NSEW")
+        # 表头设置
+        self.boolean_quaternion_tree["columns"] = ('addr', 'op', 'arg1', 'arg2', 'result')
+        self.boolean_quaternion_tree.column("addr", width=45, anchor="center")
+        self.boolean_quaternion_tree.column("op", width=45, anchor="center")
+        self.boolean_quaternion_tree.column("arg1", width=45, anchor="center")
+        self.boolean_quaternion_tree.column("arg2", width=45, anchor="center")
+        self.boolean_quaternion_tree.column("result", width=45, anchor="center")
+        # 表列设置
+        self.boolean_quaternion_tree.heading("addr", text="addr")
+        self.boolean_quaternion_tree.heading("op", text="op")
+        self.boolean_quaternion_tree.heading("arg1", text="arg1")
+        self.boolean_quaternion_tree.heading("arg2", text="arg2")
+        self.boolean_quaternion_tree.heading("result", text="result")
+        # 垂直滚动条
+        vbar = ttk.Scrollbar(self.boolean_quaternion_frame, orient="vertical", command=self.boolean_quaternion_tree.yview)
+        self.boolean_quaternion_tree.configure(yscrollcommand=vbar.set)
+        vbar.grid(row=0, column=1, sticky="NS")
+        # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # self.list_frame为真/假链容器
+        self.list_frame = Frame(master)
+        self.list_frame.pack()
+        # 实例化分析表
+        self.list_tree = ttk.Treeview(
+            self.list_frame,
+            height=2,
+            show="headings",  # 隐藏首列
+        )
+        self.list_tree.grid(row=0, column=0, columnspan=1, sticky="NSEW")
+        # 表头设置
+        self.list_tree["columns"] = ('list', 'result')
+        self.list_tree.column("list", width=45, anchor="center")
+        self.list_tree.column("result", width=180, anchor="center")
+        # 表列设置
+        self.list_tree.heading("list", text="list")
+        self.list_tree.heading("result", text="result")
+        # 垂直滚动条
+        vbar = ttk.Scrollbar(self.list_frame, orient="vertical", command=self.list_tree.yview)
+        self.list_tree.configure(yscrollcommand=vbar.set)
+        vbar.grid(row=0, column=1, sticky="NS")
+
+        self.show_boolean_quaternion()  # 展示布尔四元式
+        self.show_list()  # 展示真/假链
+
+    # 展示布尔四元式
+    def show_boolean_quaternion(self):
+        addr = 0
+        for qua in bq.quaternion:
+            values = (addr, qua[0], qua[1], qua[2], qua[3])
+            addr += 1
+            self.boolean_quaternion_tree.insert("", END, values=values)
+
+    # 展示真/假链
+    def show_list(self):
+        values = ('真链:', bq.attr[0]['true_list'])
+        self.list_tree.insert("", END, values=values)
+        values = ('假链:', bq.attr[0]['false_list'])
+        self.list_tree.insert("", END, values=values)
+
+
+
+
+
 # 主调函数
 def main():
     root = Tk()
     root.resizable(False, False)
-    root.title("LR(1)分析器")
+    root.title("LR(1)分析器与布尔四元式产生器")
     MainWindows(root)
     root.mainloop()
 
