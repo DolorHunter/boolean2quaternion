@@ -165,7 +165,6 @@ def analyzer(input_string):
 
     analysis_stack = lr1.Stack()  # # 初始化分析栈(状态符号栈)
     analysis_stack.push(['0', '#'])  # 栈底放入初始状态, 符号
-    num_temp = 0  # 变量计数器
 
     while True:
         status = int(analysis_stack.peek()[0])  # 当前状态(int)
@@ -173,6 +172,11 @@ def analyzer(input_string):
 
         # 情况三: 接受
         if lr1.action[status + 1][lr1.action[0].index(string_head)] == 'acc':
+            qua_len = len(quaternion)-1
+            if qua_len in attr[0]['true_list']:
+                quaternion[qua_len][3] = attr[0]['true_list'][-2]
+            elif qua_len in attr[0]['false_list']:
+                quaternion[qua_len][3] = attr[0]['false_list'][-2]
             lr1.action_list.append('Acc:分析成功')
             break  # 退出
         # 情况一: 移进

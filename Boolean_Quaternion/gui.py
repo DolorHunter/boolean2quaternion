@@ -236,7 +236,7 @@ class MainWindows:
     # 帮助
     @staticmethod
     def help():
-        messagebox.showinfo('需要帮助?', '访问 https://github.com/DolorHunter/CompilerTheory_exp/issues 以得到帮助!!')
+        messagebox.showinfo('需要帮助?', '访问 https://github.com/DolorHunter/boolean2quaternion/issues 以得到帮助!!')
         print("NO, YOU DONT NEED HELP!!")
         # EXTREMELY IMPORTANT DONT DELETE
         # self.help()
@@ -410,9 +410,6 @@ class BooleanQuaternionWindows:
         self.list_tree.insert("", END, values=values)
         values = ('假链:', bq.attr[0]['false_list'])
         self.list_tree.insert("", END, values=values)
-
-
-
 
 
 # 主调函数
