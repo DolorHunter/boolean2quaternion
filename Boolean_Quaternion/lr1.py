@@ -149,6 +149,7 @@ def create_first_assemble():
                     for elem in first_lang[cur_elem]:
                         first_lang[head].add(elem)
                     loc += 1
+                    cur_elem = lang[1][loc]
                 if cur_elem in vn:
                     for v in first_lang[cur_elem]:
                         first_lang[head].add(v)
