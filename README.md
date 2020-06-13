@@ -1,8 +1,8 @@
 # boolean2quaternion
 
 [![LICENSE](https://img.shields.io/badge/License-EPL--2.0-green.svg?style=flat-square)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-v3.8.0-blue.svg?style=flat-square)](https://github.com/DolorHunter/llsociety/releases)
-[![Tkinter](https://img.shields.io/badge/GUI-Tkinter-yellow.svg?style=flat-square)](https://github.com/DolorHunter/llSociety/releases)
+[![Python](https://img.shields.io/badge/Python-v3.8.0-blue.svg?style=flat-square)](https://github.com/DolorHunter/boolean2quaternion/releases)
+[![Tkinter](https://img.shields.io/badge/GUI-Tkinter-yellow.svg?style=flat-square)](https://github.com/DolorHunter/boolean2quaternion/releases)
 
 __[LR1_Analyzer](#LR1_Analyzer)__ | __[Boolean_Quaternion](#Boolean_Quaternion)__
 -|-
